@@ -169,8 +169,21 @@ LibXSLT_init_error_ctx(SV * saved_error)
 }
 
 static void
+LibXSLT_reset_error_ctx(void)
+{
+    xmlSetGenericErrorFunc(NULL, NULL);
+    xsltSetGenericErrorFunc(NULL, NULL);
+}
+
+static void
 LibXSLT_report_error_ctx(SV * saved_error, int warn_only)
 {
+    /* Reset global error handlers before returning so they no longer point
+     * to saved_error, which may be a mortal SV that will be freed shortly.
+     * Without this reset, libxml2 2.14+ may call the handler during document
+     * cleanup (triggered by Perl GC), accessing the freed SV and causing SEGV.
+     */
+    LibXSLT_reset_error_ctx();
     if( 0 < SvCUR( saved_error ) ) {
       if ( warn_only ) {
 	warn("%s", SvPV_nolen(saved_error));
@@ -958,6 +971,9 @@ _parse_stylesheet(self, sv_doc)
             XSRETURN_UNDEF;
         }
         doc_copy = xmlCopyDoc(doc, 1);
+        if (doc_copy == NULL) {
+            croak("xmlCopyDoc failed");
+        }
         if (doc_copy->URL == NULL) {
           doc_copy->URL = xmlStrdup(doc->URL);
         }
@@ -1071,6 +1087,7 @@ transform(self, wrapper, sv_doc, ...)
          * from those with terminate="yes" and fatal errors */
 	ctxt = xsltNewTransformContext(self, doc);
         if (ctxt == NULL) {
+	    LibXSLT_reset_error_ctx();
 	    croak("Could not create transformation context");
 	}
         ctxt->xinclude = 1;
@@ -1171,6 +1188,7 @@ transform_file(self, wrapper, filename, ...)
 
 	   ctxt = xsltNewTransformContext(self, source_dom);
 	   if (ctxt == NULL) {
+	     LibXSLT_reset_error_ctx();
 	     croak("Could not create transformation context");
 	   }
 	   ctxt->xinclude = 1;
