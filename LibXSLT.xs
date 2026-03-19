@@ -358,11 +358,18 @@ LibXSLT__function (xmlXPathParserContextPtr ctxt, int nargs, SV *perl_function) 
 		xsltRegisterLocalRVT(tctxt,container);
 #endif
 		tmp_node = xmlDocCopyNode(tmp_node1, container, 1);
-		/* a wraper element is needed to wrap attributes and
-		   prevent libxml2 from merging adjacent text nodes */
-		tmp_node2 = xmlNewDocNode(container,NULL,(xmlChar*) "x",NULL);
-		xmlAddChild((xmlNodePtr)container,tmp_node2);
-		xmlAddChild(tmp_node2,tmp_node);
+		/* attributes cannot be direct children of a document node,
+		   so they need a wrapper element; all other node types are
+		   added directly to avoid parent-pointer issues with
+		   libxml2 >= 2.9.10 (xmlXPathNodeSetAdd guards against
+		   nodes with non-document parents) */
+		if (tmp_node->type == XML_ATTRIBUTE_NODE) {
+		    tmp_node2 = xmlNewDocNode(container,NULL,(xmlChar*) "x",NULL);
+		    xmlAddChild((xmlNodePtr)container,tmp_node2);
+		    xmlAddChild(tmp_node2,tmp_node);
+		} else {
+		    xmlAddChild((xmlNodePtr)container,tmp_node);
+		}
 		xmlXPathNodeSetAdd(ret->nodesetval, tmp_node);
 	      } else {
 		croak("LibXSLT: perl-dispatcher returned nodelist with non-node elements\n");
@@ -396,8 +403,12 @@ LibXSLT__function (xmlXPathParserContextPtr ctxt, int nargs, SV *perl_function) 
 	      if (tmp_node == NULL) {
 		croak("LibXSLT: perl-dispatcher: cannot copy node for RVT\n");
 	      }
-	      if (tmp_node->type != XML_ELEMENT_NODE) {
-		/* create a wrapper element */
+	      if (tmp_node->type == XML_ATTRIBUTE_NODE) {
+		/* attributes cannot be direct children of a document node,
+		   so they need a wrapper element; all other node types are
+		   added directly to avoid parent-pointer issues with
+		   libxml2 >= 2.9.10 (xmlXPathNodeSetAdd guards against
+		   nodes with non-document parents) */
 		tmp_node2 = xmlNewDocNode(container,NULL,(xmlChar*) "x",NULL);
 		xmlAddChild((xmlNodePtr)container,tmp_node2);
 		xmlAddChild(tmp_node2,tmp_node);
