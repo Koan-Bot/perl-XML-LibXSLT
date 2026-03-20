@@ -30,6 +30,11 @@ jobs:
     env:
       PERL_USE_UNSAFE_INC: 0
       AUTOMATED_TESTING: 1
+      PERL_CPANM_OPT: ""
+      PERL5LIB: ""
+      PERL_LOCAL_LIB_ROOT: ""
+      PERL_MB_OPT: ""
+      PERL_MM_OPT: ""
 
     strategy:
       fail-fast: false
