@@ -58,7 +58,9 @@ jobs:
       - name: Makefile.PL
         run: perl Makefile.PL
       - name: make test
-        run: make test
+        run: rm -rf local && make test
+        env:
+          PERL5LIB: ""
 
   macos:
     name: macOS
