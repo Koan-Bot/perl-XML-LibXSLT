@@ -11,10 +11,9 @@ package XML::LibXSLT;
 use strict;
 use warnings;
 
-use 5.008;
+use 5.014;
 
-use vars
-    qw($VERSION @ISA $USE_LIBXML_DATA_TYPES $MatchCB $ReadCB $OpenCB $CloseCB);
+our ($VERSION, @ISA, $USE_LIBXML_DATA_TYPES, $MatchCB, $ReadCB, $OpenCB, $CloseCB);
 
 sub REQUIRE_XML_LIBXML_ABI_VERSION { 2 }
 
@@ -370,7 +369,7 @@ sub register_xslt_module
 package XML::LibXSLT::StylesheetWrapper;
 
 use strict;
-use vars qw($MatchCB $ReadCB $OpenCB $CloseCB);
+our ($MatchCB, $ReadCB, $OpenCB, $CloseCB);
 
 use XML::LibXML;
 use Carp;
@@ -641,7 +640,7 @@ package XML::LibXSLT::Security;
 use strict;
 use Carp;
 
-use vars qw(%OPTION_MAP %_GLOBAL_CALLBACKS);
+our %_GLOBAL_CALLBACKS;
 
 # Maps the option names used in the perl interface to the numeric values
 # used by libxslt.

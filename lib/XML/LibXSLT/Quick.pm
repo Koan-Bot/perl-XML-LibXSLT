@@ -2,7 +2,7 @@ package XML::LibXSLT::Quick;
 
 use strict;
 use warnings;
-use 5.010;
+use 5.014;
 use autodie;
 
 use Carp ();
