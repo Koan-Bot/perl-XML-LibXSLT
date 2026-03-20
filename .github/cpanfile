@@ -1,3 +1,0 @@
-requires 'Test::CPAN::Changes';
-requires 'Test::Pod';
-requires 'Test::TrailingSpace';
