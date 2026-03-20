@@ -967,7 +967,7 @@ encoded) string of characters.
 =item output_string(result)
 
 DEPRECATED: This method is something between
-C<output_as_bytes(result)> and C<output_as_bytes(result)>: The scalar
+C<output_as_bytes(result)> and C<output_as_chars(result)>: The scalar
 returned by this function appears to Perl as characters (UTF8 flag is
 on) if the output encoding specified in the XSLT stylesheet was UTF-8
 and as bytes if no output encoding was specified or if the output
@@ -1197,7 +1197,7 @@ Returns version number of libxslt library to which XML::LibXSLT is
 linked at runtime (either dynamically or statically). For example, for
 example, for libxslt.so.1.1.18, it will return 10118.
 
-=item XML::LibXSLT::HAVE_EXLT()
+=item XML::LibXSLT::HAVE_EXSLT()
 
 Returns 1 if the module was compiled with libexslt, 0 otherwise.
 
@@ -1226,7 +1226,7 @@ Shlomi Fish, L<https://www.shlomifish.org/me/contact-me/> .
 
 Please report bugs via
 
-  http://rt.cpan.org/NoAuth/Bugs.html?Dist=XML-LibXSLT
+  https://github.com/shlomif/perl-XML-LibXSLT/issues
 
 =head1 SEE ALSO
 
