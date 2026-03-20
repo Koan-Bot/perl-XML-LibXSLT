@@ -305,8 +305,12 @@ LibXSLT__function (xmlXPathParserContextPtr ctxt, int nargs, SV *perl_function) 
             break;
         default:
             /* warn("Unknown XPath return type (%d) in call to {%s}%s - assuming string", obj->type, uri, function); */
-            XPUSHs(sv_2mortal(newSVpv("XML::LibXML::Literal", 0)));
-            XPUSHs(sv_2mortal(newSVpv((char*)xmlXPathCastToString(obj), 0)));
+            {
+                xmlChar *str = xmlXPathCastToString(obj);
+                XPUSHs(sv_2mortal(newSVpv("XML::LibXML::Literal", 0)));
+                XPUSHs(sv_2mortal(newSVpv((char*)str, 0)));
+                xmlFree(str);
+            }
         }
         xmlXPathFreeObject(obj);
     }
@@ -1109,7 +1113,6 @@ transform(self, wrapper, sv_doc, ...)
 
         /* real_dom = xsltApplyStylesheet(self, doc, xslt_params); */
         if (real_dom == NULL) {
-            if ( real_dom != NULL ) xmlFreeDoc( real_dom );
             LibXSLT_report_error_ctx(saved_error,0);
             croak("Unknown error applying stylesheet");
         }
@@ -1117,8 +1120,7 @@ transform(self, wrapper, sv_doc, ...)
             if (self->method != NULL) {
                 xmlFree(self->method);
             }
-            self->method = (xmlChar *) xmlMalloc(5);
-            strcpy((char *) self->method, "html");
+            self->method = xmlStrdup((const xmlChar *) "html");
         }
         /* non-fatal: probably just a message from the stylesheet */
         LibXSLT_report_error_ctx(saved_error,1);
