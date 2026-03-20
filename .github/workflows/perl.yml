@@ -67,6 +67,7 @@ jobs:
     env:
       PERL_USE_UNSAFE_INC: 0
       AUTOMATED_TESTING: 1
+      PKG_CONFIG_PATH: /opt/homebrew/opt/libxslt/lib/pkgconfig:/opt/homebrew/opt/libxml2/lib/pkgconfig:/opt/homebrew/opt/icu4c/lib/pkgconfig
 
     steps:
       - uses: actions/checkout@v6
