@@ -90,6 +90,28 @@ See: https://bugzilla.gnome.org/show_bug.cgi?id=684564 .
 EOF
             }
 
+            # Check for known-bad combination: libxslt 1.1.43 + libxml2 >= 2.14
+            # libxslt 1.1.43 has CVEs (CVE-2025-7424, CVE-2025-11731) that cause
+            # SEGV crashes when used with libxml2 >= 2.14 due to ABI changes.
+            # Fixed in libxslt >= 1.1.44.
+            if ($major == 1 and $minor == 1 and $point == 43) {
+                my $xml2_ver = eval { backtick("$pkg_config libxml-2.0 --modversion") };
+                if ($xml2_ver) {
+                    my ($x2_major, $x2_minor) = $xml2_ver =~ /(\d+)\.(\d+)/;
+                    if (defined $x2_major && ($x2_major > 2 || ($x2_major == 2 && $x2_minor >= 14))) {
+                        warn <<"COMPAT_WARN";
+
+WARNING: libxslt-$ver with libxml2-$xml2_ver is a known-bad combination.
+libxslt 1.1.43 has bugs (CVE-2025-7424, CVE-2025-11731) that cause
+segmentation faults when used with libxml2 >= 2.14.
+Please upgrade to libxslt >= 1.1.44 or downgrade libxml2 to < 2.14.
+See: https://github.com/shlomif/perl-XML-LibXSLT/issues/8
+
+COMPAT_WARN
+                    }
+                }
+            }
+
             ($config{LIBS} ||= '' ) .= backtick("$xsltcfg --libs");
             ($config{INC} ||= '') .= backtick("$xsltcfg --cflags");
             print "ok\n";

@@ -1236,11 +1236,12 @@ _output_string(self, sv_doc, bytes_vs_chars=0)
     CODE:
         XSLT_GET_IMPORT_PTR(encoding, self, encoding)
         if (encoding != NULL) {
-            encoder = xmlFindCharEncodingHandler((char *)encoding);
-            if ((encoder != NULL) &&
-                 (xmlStrEqual((const xmlChar *)encoder->name,
-                              (const xmlChar *) "UTF-8")))
-                encoder = NULL;
+            /* Use xmlParseCharEncoding to detect UTF-8 instead of accessing
+             * encoder->name directly, which relies on internal struct layout
+             * that changed in libxml2 2.14 */
+            if (xmlParseCharEncoding((const char *)encoding) != XML_CHAR_ENCODING_UTF8) {
+                encoder = xmlFindCharEncodingHandler((char *)encoding);
+            }
         }
 
         if (LibXSLT_debug_cb && SvTRUE(LibXSLT_debug_cb)) {
@@ -1281,11 +1282,9 @@ output_fh(self, sv_doc, fh)
     CODE:
         XSLT_GET_IMPORT_PTR(encoding, self, encoding)
         if (encoding != NULL) {
-            encoder = xmlFindCharEncodingHandler((char *)encoding);
-            if ((encoder != NULL) &&
-                 (xmlStrEqual((const xmlChar *)encoder->name,
-                              (const xmlChar *) "UTF-8")))
-                encoder = NULL;
+            if (xmlParseCharEncoding((const char *)encoding) != XML_CHAR_ENCODING_UTF8) {
+                encoder = xmlFindCharEncodingHandler((char *)encoding);
+            }
         }
 
         if (LibXSLT_debug_cb && SvTRUE(LibXSLT_debug_cb)) {
